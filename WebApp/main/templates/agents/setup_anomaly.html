@@ -1,0 +1,77 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container pt-5">
+    <img src="{% static 'main/tf_logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
+    <h3 class="mb-3">Anomaly Detection Training (Agent: {{agent.name}})</h3>
+    <div class="alert alert-secondary" role="alert">
+        <h5>How to train</h5>
+        <p>TensorFlow is a library for training neural networks. The specific architecture in this WebApp is an autoencoder,
+            which reduces the data to a low dimensional vector and then aims to reconstruct it. By training the encoder
+            on one specific type of syntax, the network will remember to reconstruct the format well. When presented with a
+            different format, the reconstruction error will typically be much higher. This allows for detection of 
+            format violations without ever specifically defining the format. Consider the following questions when choosing 
+            a target column:
+        <ul>
+            <li><strong>Does this column require a consistent syntax?</strong> If not, consider a different column.
+            </li>
+            <li><strong>Is the provided training data guaranteed to be pure? </strong> If not,
+                consider a different dataset.</li>
+        </ul>
+        </p>
+        <p>
+            Example fields that the Anomaly Detection may be appropriate for:
+            <ul>
+                <li>Dates</li>
+                <li>Serial Codes</li>
+                <li>Phone Numbers</li>
+            </ul>
+        </p>
+    </div>
+
+    <form method="POST" action="/agents/train/{{agent.id}}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="datasetSelect">Select a dataset to train on</label>
+            <select class="form-control" id="datasetSelect" name="dataset" onchange="datasetChanged()">
+                <option disabled selected value> Select dataset </option>
+                {% for dataset in datasets %}
+                <option value={{dataset.id}}>{{dataset.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <label for="columnId">Select a column to train on (select dataset first)</label>
+        <div class="form-group">
+            <select class="form-control" id="columnId" name="columnId" disabled>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Setup Agent</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    //when a dataset is selected, add an option for each column to train on (for both x and y)
+    function datasetChanged() {
+        value = $("#datasetSelect").val()
+        $.ajax({
+            url: '/ajax/get_columns/' + value,
+            dataType: 'json',
+            success: function (data) {
+                counter = 1;
+                options = ""
+                data.columns.forEach(element => {
+                    options += '<option value="' + element.id + '">' + element.name + ' (' + element
+                        .dtype + ')</option>'
+                })
+
+                $("#columnId").html(options)
+                $("#columnId").removeAttr('disabled')
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'main/addagent.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3 class="mb-3">Add new ML Agent</h3>
+    <h5>Select agent type</h5>
+    <div class="card-group text-justify">
+        <div class="card">
+            <img class="card-img-top p-4" src="{% static 'main/dedupeio-logo.png' %}" alt="Dedupe.io Logo">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Dedupe</h5>
+                <p class="card-text">Dedupe is a deduplication library performing fuzzy matching of records using human
+                    labeled input (active learning). Use Dedupe Agents to find typos in entries with common names.</p>
+
+                <strong>Example Smells:</strong>
+                <ul>
+                    <li>Spacing Smell</li>
+                    <li>Casing Smell</li>
+                    <li>Truncating Smell</li>
+                </ul>
+                <p class="card-text text-center mt-auto">
+                    <button id="agent1" class="btn btn-success" onclick="changedAgent(1)" hidden>Select this
+                        agent</button>
+                    <small id="selected1" class="text-muted">This option is currently selected.</small>
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <img class="card-img-top p-4" src="{% static 'main/gensim_logo.png' %}" alt="gensim Logo">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">gensim</h5>
+                <p class="card-text">Gensim is a topic modelling library using the word2vec algorithm. Use gensim to
+                    find semantically similar data entries and synonyms.</p><br />
+                <strong>Example Smells:</strong>
+                <ul>
+                    <li>Synonym Smell</li>
+                </ul>
+                <br />
+                <p class="card-text text-center mt-auto">
+                    <button id="agent2" class="btn btn-success" onclick="changedAgent(2)">Select this agent</button>
+                    <small id="selected2" class="text-muted" hidden>This option is currently selected.</small>
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <img class="card-img-top p-4" src="{% static 'main/tf_logo.png' %}" alt="TensorFlow Logo">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">LSTM Classification</h5>
+                <p class="card-text">TensorFlow is a library for easy implementation of neural networks. This
+                    approach utilizes an LSTM to perform character-level classification of text columns.</p>
+                <strong>Example Smells:</strong>
+                <ul class="text-left">
+                    <li>Date as DateTime Smell</li>
+                    <li>DateTime as String Smell</li>
+                    <li>Ambiguous Date Smell</li>
+                </ul>
+                <p class="card-text text-center mt-auto">
+                    <button id="agent3" class="btn btn-success" onclick="changedAgent(3)">Select this agent</button>
+                    <small id="selected3" class="text-muted" hidden>This option is currently selected.</small>
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <img class="card-img-top p-4" src="{% static 'main/tf_logo.png' %}" alt="TensorFlow Logo">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Anomaly Detection</h5>
+                <p class="card-text">TensorFlow is a library for easy implementation of neural networks. This TensorFlow
+                    approach provides anomaly detection for columns that require consistent syntax.</p>
+                <strong>Example Smells:</strong>
+                <ul class="text-left">
+                    <li>Date/Time Format Inconsistency Smell</li>
+                    <li>Syntax Inconsistency Smell</li>
+                </ul>
+                <p class="card-text text-center mt-auto">
+                    <button id="agent4" class="btn btn-success" onclick="changedAgent(4)">Select this agent</button>
+                    <small id="selected4" class="text-muted" hidden>This option is currently selected.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <h5 class="mt-3">Enter details</h5>
+    <form method="POST" action="/agents/add">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Create Agent</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function changedAgent(id) 
+    {
+        //set all selected to hidden except clicked, set all buttons to visible except clicked
+        for (i = 1; i < 5; i++) {
+            if (i == id) {
+                $("#selected" + i).attr("hidden", false)
+                $("#agent" + i).attr('hidden', true)
+            } else {
+                $("#selected" + i).attr('hidden', true)
+                $("#agent" + i).attr("hidden", false)
+            }
+        }
+
+        $("#id_agent_type").val(id)
+    }
+</script>
+{% endblock %}

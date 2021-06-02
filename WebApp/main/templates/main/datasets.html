@@ -1,0 +1,101 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container pt-5">
+  <h3 class="mb-3">{{ username }}'s Datasets</h3>
+  <button class="btn btn-success" data-toggle="modal" data-target="#addDatasetModal"><span
+      class="oi oi-plus mr-2"></span>Add new</button>
+  <table class="table table-striped mt-3" style="table-layout:fixed;">
+    <caption>List of Datasets</caption>
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Filename</th>
+        <th scope="col">Description</th>
+        <th scope="col" style="width:70px;" class="text-center">Edit</th>
+        <th scope="col" style="width:70px;" class="text-center">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dataset in datasets %}
+      <tr>
+        <td>{{dataset.name}}</td>
+        <td>{{dataset.get_filename}}</td>
+        <td>{{dataset.description}}</td>
+        <td class="text-center"><a href="/datasets/{{dataset.id}}"><button class="btn btn-secondary"><span
+                class="oi oi-pencil"></span></button></a></td>
+        <td class="text-center"><button class="btn btn-danger"
+            onclick="openDeleteDataset({{dataset.id}}, '{{dataset.name}}')"><span class="oi oi-delete"></span></button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Add dataset modal -->
+<div class="modal fade" id="addDatasetModal" tabindex="-1" role="dialog" aria-labelledby="addDatasetModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addDatasetModalLabel">Add dataset</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/datasets/add" enctype="multipart/form-data" method="POST" class="form-group" id="addDatasetForm">
+          {% csrf_token %}
+          {{ form|crispy }}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success" form="addDatasetForm">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete dataset modal -->
+<div class="modal fade" id="deleteDatasetModal" tabindex="-1" role="dialog" aria-labelledby="deleteDatasetModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteDatasetModalLabel">Delete dataset</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        You are about to delete the dataset <strong><span id="deleteFileName">file.csv</span></strong>. <br />
+        This action <strong> CANNOT BE UNDONE. </strong>
+        <form action="/datasets/delete" method="POST" class="form-group" id="deleteDatasetForm">
+          {% csrf_token %}
+          {{ deleteForm }}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-danger" form="deleteDatasetForm">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  deleteDatasetId = 0
+
+  function openDeleteDataset(id, name) {
+    $('#deleteFileName').text(name)
+    $('#id_id').val(id)
+    $('#deleteDatasetModal').modal().show(true)
+  }
+</script>
+{% endblock %}

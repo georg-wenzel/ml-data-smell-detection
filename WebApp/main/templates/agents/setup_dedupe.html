@@ -1,0 +1,71 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container pt-5">
+    <img src="{% static 'main/dedupeio-logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
+    <h3 class="mb-3">Dedupe Agent Training (Agent: {{agent.name}})</h3>
+    <div class="alert alert-secondary" role="alert">
+        <h5>How to train</h5>
+        <p>Dedupe is a deduplication library using fuzzy string matching with rules learned from active user input. </p>
+        <p>When selecting which columns to train on, ask yourself the following questions:
+        <ul>
+            <li><strong>Can this column contain duplicate entries?</strong> If not, consider omitting it.</li>
+            <li><strong>Does this field contain textual data or numeric data that represents an abstract concept? (e.g.
+                    zip codes)</strong> If not, consider omitting it.</li>
+        </ul>
+        </p>
+        <p>
+            Example fields that Dedupe may be appropriate for:
+        <ul>
+            <li>Names</li>
+            <li>Addresses</li>
+            <li>Concise Descriptions</li>
+        </ul>
+        </p>
+    </div>
+
+    <form method="POST" action="/agents/train/{{agent.id}}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="datasetSelect">Select a dataset to train on</label>
+            <select class="form-control" id="datasetSelect" name="dataset" onchange="datasetChanged()">
+                <option disabled selected value> Select dataset </option>
+                {% for dataset in datasets %}
+                <option value={{dataset.id}}>{{dataset.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <label for="datasetSelect">Select one or multiple columns to train on</label>
+        <div class="form-group" id="columnList">
+            <div class="alert alert-warning" role="alert">
+                Select a dataset first.
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Setup Agent</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    //when a dataset is selected, add a checkbox for each column for selection
+    function datasetChanged() {
+        value = $("#datasetSelect").val()
+        $.ajax({
+            url: '/ajax/get_columns/' + value,
+            dataType: 'json',
+            success: function (data) {
+                counter = 1;
+                container = $("#columnList")
+                container.empty()
+                data.columns.forEach(element => {
+                    container.append('<input type="checkbox" class="form-check-input" name="check' + counter + '" value="' + element.id + '"/>' + element.name + ' (' + element.dtype + ')<br />')
+                    counter++
+                })
+            }
+        });
+    }
+</script>
+{% endblock %}

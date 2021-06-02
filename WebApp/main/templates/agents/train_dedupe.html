@@ -1,0 +1,186 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container pt-5">
+    <img src="{% static 'main/dedupeio-logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
+    <h3 class="mb-3">Dedupe Agent Training (Agent: {{agent.name}})</h3>
+
+    <h5>Active Labelling</h5>
+    <p>
+        You will be presented with two data entries from your training dataset below. Please compare the records and
+        decide whether they are <strong>distinct</strong> or <strong>duplicate</strong> (i.e. if they <strong>refer to
+            the same entity or not</strong>).
+        It is recommended to provide at least 10 examples of duplicate and distinct entries before storing the data.
+    </p>
+    <div id="labelAlert" class="alert alert-warning" role="alert">
+        Please <strong>never</strong> come close to manually labelling the entire dataset, as this can crash the agent.
+    </div>
+
+    <div class="alert alert-info" role="alert">
+        Marked in this session: <br />
+        <strong><span id="duplicateAmount">0</span></strong> duplicate pairs. <br />
+        <strong><span id="distinctAmount">0</span></strong> distinct pairs. <br />
+    </div>
+
+    <button type="button" class="btn btn-success" id="btn_distinct" onClick="buttonPressed(1)">The entries are
+        distinct</button>
+    <button type="button" class="btn btn-danger" id="btn_duplicate" onClick="buttonPressed(2)">The entries are
+        duplicate</button>
+    <button type="button" class="btn btn-primary" id="btn_finish" onClick="finishTraining()">Finish Training and store
+        learned data</button>
+
+    <table class="table mt-5">
+        <caption>Comparison of potentially duplicate entities.</caption>
+        <thead class="text-center">
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Entity 1</th>
+                <th scope="col">Entity 2</th>
+            </tr>
+        </thead>
+        <tbody id="entityTable">
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if not training %}
+
+<script>
+    //counter that updates whenever an ajax request is submitted
+    distinctCounter = 0
+    duplicateCounter = 0
+
+    //contains the current uncertain pairs which dedupe returned
+    pairList = []
+
+    //contains the current labeled pairs
+    labelledPairs = {
+        "match": [],
+        "distinct": []
+    }
+
+    //get a pair when the document is ready
+    $('document').ready(() => {
+        setNextPair()
+    })
+
+    //labels the current pair as distinct or duplicate, depending on button pressed
+    function buttonPressed(id) {
+        if (id == 1) {
+            labelledPairs["distinct"].push(pairList[0])
+            distinctCounter++
+            $('#distinctAmount').html(distinctCounter)
+            pairList.shift()
+        } else {
+            labelledPairs["match"].push(pairList[0])
+            duplicateCounter++
+            $('#duplicateAmount').html(duplicateCounter)
+            pairList.shift()
+        }
+        //get next pair from list
+        setNextPair()
+    }
+
+    //submits a POST request with current labeled data if there is still any stored clientside, then submits a final post request
+    function finishTraining() {
+        if (labelledPairs["match"].length + labelledPairs["distinct"].length > 0) {
+            $.ajax({
+                url: '/ajax/get_dedupe_pair/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(labelledPairs),
+                dataType: 'text',
+                success: function (result) {
+                    //submits a request to finish training after these pairs have been evaluated
+                    sendFinishPost()
+                    return
+                }
+            });
+        } else {
+            //immediately submits a request to finish training
+            sendFinishPost()
+            return
+        }
+    }
+
+    //sends a post request which implies we wish to finish training this agent
+    function sendFinishPost() {
+        var url = '/ajax/store_dedupe_training/';
+        var form = $('<form action="' + url + '" method="post">' +
+            '</form>');
+        $('body').append(form);
+        form.submit();
+    }
+
+    //sets a new pair to label
+    function setNextPair() {
+        //if there is no more pairs in the pair list
+        if (pairList.length == 0) {
+            //if there is still unsent labelled pairs
+            if (labelledPairs["match"].length + labelledPairs["distinct"].length > 0) {
+                //send pairs which will resubmit the request to load new pairs
+                submitPairs()
+                return
+            } else {
+                //otherwise just send a load request
+                loadNewPairs()
+            }
+            return
+        }
+
+        //set the table to the current pair at index 0
+        setPair(pairList[0][0], pairList[0][1])
+    }
+
+    //sends a get request to load new pairs for this agent to label
+    function loadNewPairs() {
+        $.ajax({
+            url: '/ajax/get_dedupe_pair/',
+            dataType: 'json',
+            success: function (data) {
+                //populate pair list with ajax return
+                pairList = data.pairs
+                if (pairList.length > 0)
+                    setPair(pairList[0][0], pairList[0][1])
+            }
+        });
+    }
+
+    //adds the given pair of data into the table 
+    function setPair(entry1, entry2) {
+        //build html string
+        htmlstring = ""
+        for (key in entry1) {
+            htmlstring += "<tr><td><strong>" + key + "</strong></td><td class=\"text-center\">" + entry1[key] +
+                "</td><td class=\"text-center\">" + entry2[key] + "</td>"
+        }
+        $('#entityTable').html(htmlstring)
+    }
+
+    //submits pairs that are currently labeled, and get new pairs as a result
+    function submitPairs() {
+        $.ajax({
+            url: '/ajax/get_dedupe_pair/',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(labelledPairs),
+            dataType: 'json',
+            success: function (result) {
+                //reset labelled pairs and get new pairs
+                labelledPairs = {
+                    "match": [],
+                    "distinct": []
+                }
+                pairList = result.pairs
+                if (pairList.length > 0)
+                    setPair(pairList[0][0], pairList[0][1])
+            }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

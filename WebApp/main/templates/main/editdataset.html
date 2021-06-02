@@ -1,0 +1,35 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3 class="mb-3">{{dataset.name}} [Details]</h3>
+
+    <form method="POST" action="/datasets/{{dataset.id}}">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <table>
+            <caption>Columns</caption>
+            {% crispy colforms colforms.form.helper %}
+        </table>
+        <button type="submit" class="btn btn-success">Update</button>
+    </form>
+
+    <h5>Metadata</h5>
+    <table class="table">
+        <caption>Dataset Metadata</caption>
+        <tr>
+            <th scope="row"><strong>Filename</strong></th>
+            <td> {{dataset.get_filename}}</td>
+        </tr>
+        <tr>
+            <th scope="row"><strong>Rows</strong></th>
+            <td> {{dataset.row_length}}</td>
+        </tr>
+        <tr>
+            <th scope="row"><strong>Columns</strong></th>
+            <td> {{dataset.col_length}}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

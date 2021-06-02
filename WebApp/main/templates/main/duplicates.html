@@ -1,0 +1,67 @@
+{% extends "main/baseloggedin.html" %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3 class="mb-3">Gensim Results: {{dataset.name}} ({{column.name}})</h3>
+    <a href="/download"><button class="btn btn-success"><span class="oi oi-data-transfer-download"></span> Download
+            Results</button></a>
+    <h5 class="mt-3">Synonymous pairs ({{matches.items|length}} found)</h5>
+    <p class="text-justify">You have manually labeled the following pairs as synonymous. You may download the updated
+        dataset using the button above. More details are shown below about each word pair. <strong>Note</strong>:
+        Occurences and examples below are only counted if the word is used in the middle of a sentence by itself. On the
+        other hand, during initial collection of the word pairs, words are actively tokenized. This can lead to
+        0-occurence words in rare cases. However, in these cases, the word has still been actively detected at least
+        once in your dataset.
+    </p>
+    {% for pairnum,pair in matches.items %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <h5 class="card-title">
+                Pair: {{ pair.word1 }} - {{pair.word2}} (rcs: {{pair.rcs}})
+            </h5>
+            <div class="card-text">
+                <p>The word <strong>{{pair.word1}}</strong> has been detected
+                    {{pair.word1_occurences|length}} times in your dataset, while the word
+                    <strong>{{pair.word2}}</strong> has been detected {{pair.word2_occurences|length}} times.</p>
+                <div id="accordion">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{pairnum}}_1"
+                                    aria-controls="#collapse{{pairnum}}_1">
+                                    Show example occurences of {{pair.word1}}.
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse{{pairnum}}_1" class="collapse hide" data-parent="#accordion">
+                            <ul>
+                                {% for entry in pair.word1_examples %}
+                                <li> {{entry|safe}} </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{pairnum}}_2"
+                                    aria-controls="#collapse{{pairnum}}_2">
+                                    Show example occurences of {{pair.word2}}.
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse{{pairnum}}_2" class="collapse hide" data-parent="#accordion">
+                            <ul>
+                                {% for entry in pair.word2_examples %}
+                                <li> {{entry|safe}} </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

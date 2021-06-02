@@ -1,0 +1,158 @@
+<html lang="en">
+<head>
+    <title>ML Data Smell Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css"
+        rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <span class="navbar-brand">ML Data Smell Detection</span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href="/">Home</a>
+                <a class="nav-item nav-link" href="/datasets">Datasets</a>
+                <a class="nav-item nav-link" href="/agents">ML Agents</a>
+                <a class="nav-item nav-link" href="/analyze">Analyze</a>
+            </div>
+        </div>
+        <ul class="navbar-nav ml-auto">
+            <li>Logged in as <strong>{{ username }}</strong>. <a href="/user/logout">Logout</a></li>
+        </ul>
+    </nav>
+    {% if messages %}
+    {% for message in messages %}
+    <div class="toast" style="position: absolute; bottom: 50; right: 50;">
+        <div class="toast-header">
+            <strong class="mr-auto">
+                {% if message.tags == 'error' %} Error {% endif %}
+                {% if message.tags == 'success' %} Success {% endif %}
+            </strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% block content %}
+    <div class="jumbotron jumbotron-fluid text-center bg-dark text-white">
+        <h1>Data Smell Detection with Machine Learning </h1>
+        <h3>A demonstrative implementation</h3>
+    </div>
+    <div class="container">
+        <div class="alert alert-info" role="alert">
+            <p>This project aims to demonstrate the implementations for detection of data smells using machine learning
+                algorithms. The underlying mathematical concepts and experimental results can be found in the
+                corresponding paper. Datasets must be uploaded in the form of UTF-8 encoded .csv files.</p>
+        </div>
+
+
+        <div class="row bg-primary text-white mx-1 rounded align-items-center" style="height:50px;">
+            <div class="text-center w-100">
+                <h4>The general workflow</h4>
+            </div>
+        </div>
+        <div class="row mx-1 pt-3 mb-4 text-justify">
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h5 class="text-center"><span class="oi oi-data-transfer-upload"></span> Upload dataset
+                            </h5>
+                        </div>
+                        <div class="card-text">
+                            <p>Use the <a href="/datasets">Datasets</a> page to upload .csv files and
+                                define dataset metadata (such as column datatypes and -headings). Please note the
+                                respective data types required for each agent.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h5 class="text-center"><span class="oi oi-code"></span> Create ML Agent
+                            </h5>
+                        </div>
+                        <div class="card-text">
+                            <p>Use the <a href="/agents">ML Agents</a> page to define a ML agent. The page will give
+                                overviews about how the different agents learn and which data smells each type may be able to
+                                detect.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h5 class="text-center"><span class="oi oi-beaker"></span> Train ML Agent
+                            </h5>
+                        </div>
+                        <div class="card-text">
+                            <p> Depending on the type of ML agent, learning may be passive or active and may require you
+                                to define single columns or a subset of multiple columns of the dataset.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h5 class="text-center"><span class="oi oi-clipboard"></span> Validate dataset
+                            </h5>
+                        </div>
+                        <div class="card-text">
+                            <p><a href="/analyze">Analyze</a> an uploaded dataset using a trained agent to check for
+                                signs of low quality data and extract detailed classification of samples based on previous training.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    {% endblock %}
+</body>
+
+{% if messages %}
+<script>
+    $('.toast').toast({
+        'autohide': false
+    });
+
+    $('.toast').toast('show');
+</script>
+{% endif %}
+{% block scripts %}
+{% endblock %}
+
+</html>

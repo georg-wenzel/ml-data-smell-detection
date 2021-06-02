@@ -1,0 +1,83 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container pt-5">
+    <img src="{% static 'main/gensim_logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
+    <h3 class="mb-3">Gensim Agent Training (Agent: {{agent.name}})</h3>
+    <div class="alert alert-secondary" role="alert">
+        <h5>How to train</h5>
+        <p>gensim is a topic modelling library using the word2vec algorithm to automatically learn and match topics of text. <br />
+        gensim should be trained on a single column which has a high likelihood of containing similar words or topics. Consider things such as the following: </p>
+        <ul>
+            <li><strong>Does this column contain descriptive text?</strong> If not, consider a different column.</li>
+            <li><strong>Are you trying to detect synonymous words within this column? </strong> If not, consider a different column.</li>
+        </ul>
+        </p>
+        <p>
+            Example fields that gensim may be appropriate for:
+        <ul>
+            <li>Descriptions of Data (Projects, People, ...)</li>
+            <li>Textual records of speech</li>
+            <li>Free-form comment fields</li>
+        </ul>
+        </p>
+    </div>
+
+    <form method="POST" action="/agents/train/{{agent.id}}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="datasetSelect">Select a dataset to train on</label>
+            <select class="form-control" id="datasetSelect" name="dataset" onchange="datasetChanged()">
+                <option disabled selected value> Select dataset </option>
+                {% for dataset in datasets %}
+                <option value={{dataset.id}}>{{dataset.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <label for="datasetSelect">Select a column to train on (select dataset first)</label>
+        <div class="form-group">
+            <select class="form-control" id="columnId" name="columnId" disabled>
+            </select>
+        </div>
+        <input type="submit" name="selftrained-setup" class="btn btn-success" value="Setup agent"></input>
+
+    <h1 class="my-3"><strong>OR</strong></h1>
+        <div class="form-group">
+            <label for="datasetSelect">Select a pretrained model</label>
+            <select class="form-control" id="pretrainedSelect" name="pretrainedSet">
+                <option disabled selected value> Select pretrained model </option>
+                {% for model in pretrained %}
+                <option value={{model}}>{{model}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" name="pretrained-setup" class="btn btn-success" value="Use pretrained model"></input>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    //when a dataset is selected, add an option for each column to train on
+    function datasetChanged() {
+        value = $("#datasetSelect").val()
+        $.ajax({
+            url: '/ajax/get_columns/' + value,
+            dataType: 'json',
+            success: function (data) {
+                counter = 1;
+                select = $("#columnId")
+                options = ""
+                data.columns.forEach(element => {
+                    options += '<option value="' + element.id + '">' + element.name + ' (' + element.dtype + ')</option>'
+                })
+                console.log(options)
+                select.html(options)
+                select.removeAttr('disabled')
+            }
+        });
+    }
+</script>
+{% endblock %}

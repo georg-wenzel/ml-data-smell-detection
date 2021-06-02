@@ -1,0 +1,11 @@
+dd-MMM-yyyy
+MM/dd/yyyy
+dd.MM.yyyy
+yyyy/MM/dd
+yyyy-MM-dd
+mon dd, yyyy
+
+hh:mmSz
+hh:mm:ss.sS z
+hh:mm:ssSz
+hh.mm Sz

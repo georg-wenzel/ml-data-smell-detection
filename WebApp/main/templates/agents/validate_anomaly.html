@@ -1,0 +1,43 @@
+{% extends "main/baseloggedin.html" %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3>Anomaly Detection Results: {{agent.name}} on {{dataset.name}}</h3>
+    <a href="/download"><button class="btn btn-success"><span class="oi oi-data-transfer-download"></span> Download
+            Results</button></a>
+
+    <h5 class="mt-3">Anomaly Classification ({{counts.1}} anomalies found)</h5>
+    <p class="text-justify">Anomaly classification performs binary classification on your desired dataset with respect
+        to the training set. If all data is clean, ideally all data points should be in cluster 0. The threshold for
+        anomaly classification in this application is the 99th percentile MSE detected during training. Please see the
+        highest and lowest MSE entries below. If these match up in syntax and the number of entries detected as outliers
+        is low, it is likely no syntax-related smell is present. </br><br />
+
+        The threshold MSE required for a sample to be classified as an outlier is <strong>{{mse.2}}</strong>.
+    </p>
+
+    <h6>Classified as inliers ({{counts.0}} entries)</h6>
+    Overall, <strong>{{counts.0}}</strong> entries have been classified as inliers. <br />
+    The average mean squared error in this class is <strong>{{mse.0}}</strong>.
+
+    <p>Head of inliers (lowest MSE):</p>
+    <ul>
+        {% for entry in examples.0 %}
+        <li>{{entry.0}} (MSE {{entry.1}})</li>
+        {% endfor %}
+    </ul>
+
+
+    <h6 class="mt-4">Classified as outliers ({{counts.1}} entries)</h6>
+    Overall, <strong>{{counts.1}}</strong> entries have been classified as inliers. <br />
+    The average mean squared error in this class is <strong>{{mse.1}}</strong>.
+
+    <p>Tail of outliers (highest MSE):</p>
+    <ul>
+        {% for entry in examples.1 %}
+        <li>{{entry.0}} (MSE {{entry.1}})</li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock %}

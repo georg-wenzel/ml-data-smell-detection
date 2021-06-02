@@ -1,0 +1,136 @@
+{% extends "main/baseloggedin.html" %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3>Data Validation</h3>
+    <p>Perform data validation on datasets using trained agents. Depending on the type of agent used, your output may
+        vary.</p>
+
+    <form action="/analyze/" method="POST">
+        {% csrf_token %}
+        <h5>1. Select a dataset</h5>
+        <p>From the list below, select a dataset to validate.</p>
+        <select class="form-control" aria-label="Dataset Selection" id="datasetSelect" name="dataset"
+            onchange="datasetChanged()">
+            <option disabled selected value>Select a dataset</option>
+            {% for dataset in datasets %}
+            <option value={{dataset.id}}>{{dataset.name}}</option>
+            {% endfor %}
+        </select>
+
+        <h5 class="mt-4">2. Select a trained agent</h5>
+        <p>From the list below, select one of your trained agents. In brackets will be the columns the agent was trained
+            on. </p>
+        <select class="form-control" aria-label="Agent Selection" id="selectAgent" name="agent"
+            onchange="agentChanged()">
+            <option disabled selected value>Select an agent</option>
+            {% for agent in agents %}
+            <option value={{agent.id}}>{{agent.short_description}}</option>
+            {% endfor %}
+        </select>
+
+
+        <h5 class="mt-4">3. Select additional options</h5>
+        <p>Depending on your chosen agent type, you may be required to provide additional details.<br />
+            <div id="defaultSelectAgent">
+                <strong>Select an agent first.</strong>
+            </div>
+        </p>
+
+        <div id="colSelect" class="mb-4" hidden>
+            <h6>Validation Column</h6>
+            This type of agent validates against a specific column. Please select a column from the selected dataset,
+            which matches up with the type of column this agent was trained on.
+            <select disabled class="form-control" aria-label="Dataset Selection" id="columnId" name="column">
+                <option value="" disabled selected>Select a dataset first</option>
+            </select>
+        </div>
+
+        <div id="rcsInput" class="mb-4" hidden>
+            <h6>RCS Relative Entries</h6>
+            gensim agents determine word pairs which have a higher relative cosine similarity than average. This value
+            determines how many of the top similar words are taken as a baseline for cosine similarity (10 is
+            recommended).
+            <input type="number" id="rcsNum" name="rcsNum" min="1" class="form-control" value="10" />
+
+            <h6 class="mt-4">RCS Threshold</h6>
+            gensim agents determine word pairs which have a higher relative cosine similarity than average. The average
+            is 1/n,
+            where n is the number of words considered for the baseline (see above entry). For rcs10, 0.11 is a good
+            threshold.
+            <input type="number" id="rcsThreshold" name="rcsThreshold" min="0" max="1" class="form-control" value="0.11"
+                step="0.01" />
+
+            <h6 class="mt-4">(Optional) Analyze using two RCS instances</h6>
+            You may optionally select a second gensim agent to validate against. Your main agent will be used as a base
+            for finding similar words, and these word pairs will then also be looked up in the secondary dataset. The
+            resulting RCS will be summed, so the threshold needs to be adapted as necessary. For rcs10, 0.22 is a good
+            threshold for summed RCS.
+            <select class="form-control" aria-label="Secondary Agent Selection" id="rcsSecondaryAgent"
+                name="rcsSecondaryAgent">
+                <option value="-1" selected>Do not use a secondary agent</option>
+            </select>
+        </div>
+
+        <button class="btn btn-success mt-4" type="submit">Validate Dataset</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function datasetChanged() {
+        value = $("#datasetSelect").val()
+        $.ajax({
+            url: '/ajax/get_columns/' + value,
+            dataType: 'json',
+            success: function (data) {
+                select = $("#columnId")
+                options = ""
+                data.columns.forEach(element => {
+                    options += '<option value="' + element.id + '">' + element.name + ' (' + element
+                        .dtype + ')</option>'
+                })
+                select.html(options)
+                select.removeAttr('disabled')
+            }
+        });
+    }
+
+    function agentChanged() {
+        value = $("#selectAgent").val()
+        $.ajax({
+                url: '/ajax/get_agent_type/' + value,
+                dataType: 'json',
+                success: function (data) {
+                    //hide "select an agent"
+                    $('#defaultSelectAgent').hide()
+
+                    //gensim => show rcs options
+                    $('#rcsInput').attr('hidden', data.type != 2);
+
+                    //gensim & tf => show column selection
+                    $('#colSelect').attr('hidden', data.type == 1);
+
+                    if (data.type == 2) {
+                        //make a second ajax call to get other gensim agents which can be used as secondary agents
+                        $.ajax({
+                                url: '/ajax/get_other_gensim_agents/' + value,
+                                dataType: 'json',
+                                success: function (data) {
+                                    select = $("#rcsSecondaryAgent")
+                                    options =
+                                        "<option value=\"-1\" selected>Do not use a secondary agent</option>"
+                                    data.agents.forEach(element => {
+                                        options += '<option value="' + element.id + '">' +
+                                            element.name + '</option>'
+                                    })
+                                    select.html(options)
+                                }
+                            })
+                        }
+                    }
+                });
+        }
+</script>
+{% endblock %}

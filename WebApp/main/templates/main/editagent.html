@@ -1,0 +1,57 @@
+{% extends "main/baseloggedin.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container pt-5">
+    <h3 class="mb-3">{{agent.name}} [Details]</h3>
+    <form method="POST" action="/agents/{{agent.id}}">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Update</button>
+    </form>
+
+    <h5>Metadata</h5>
+    <table class="table">
+        <caption>Agent Metadata</caption>
+        <tr>
+            <th scope="row"><strong>Training Type</th>
+            {% if agent.settings %} <td> Trained by dataset </td>
+            {% elif agent.external_prepared %} <td> External Training File </td>
+            {% else %} <td> Agent not trained yet </td>
+            {% endif %}
+        </tr>
+        {% if agent.dataset %}
+        <tr>
+            <th scope="row"><strong>Training Dataset</strong></th>
+            <td> {{agent.dataset.name}} </td>
+        </tr>
+        <tr>
+            <th scope="row"><strong>Training Columns</strong></th>
+            <td> {{ columns }}</td>
+        </tr>
+        {% endif %}
+        {% if agent.model %}
+        <tr>
+            <th scope="row"><strong>Model File</strong></th>
+            <td> {{ agent.model.name }}</td>
+            <td style="width: 70px;"><a href="/download_model/{{agent.id}}"><button class="btn btn-success"><span
+                            class="oi oi-data-transfer-download"></span></button></a></td>
+        </tr>
+        {% endif %}
+        {% if agent.settings %}
+        <tr>
+            <th scope="row"><strong>Settings File</strong></th>
+            <td> {{agent.settings.name}} </td>
+            <td style="width: 70px;"><a href="/download_settings/{{agent.id}}"><button class="btn btn-success"><span
+                            class="oi oi-data-transfer-download"></span></button></a></td>
+        </tr>
+        {% endif %}
+        {% if agent.external_set_key %}
+        <tr>
+            <th scope="row"><strong>External File Key</strong></th>
+            <td> {{agent.external_set_key}} </td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endblock %}
