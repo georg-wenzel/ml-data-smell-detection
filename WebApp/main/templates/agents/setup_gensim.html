@@ -3,13 +3,30 @@
 {% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Training Agent</h5>
+            </div>
+            <div class="modal-body">
+                Your agent is currently training. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your agent is still actively being
+                trained. <br />
+                    <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <img src="{% static 'main/gensim_logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
     <h3 class="mb-3">Gensim Agent Training (Agent: {{agent.name}})</h3>
-    <div class="alert alert-secondary" role="alert">
+    <div class="alert alert-info" role="alert">
         <h5>How to train</h5>
-        <p>gensim is a topic modelling library using the word2vec algorithm to automatically learn and match topics of text. <br />
-        gensim should be trained on a single column which has a high likelihood of containing similar words or topics. Consider things such as the following: </p>
+        <p>gensim is a topic modelling library using the Word2Vec algorithm to automatically learn and match related words. <br />
+        gensim should be trained on a single column which has a high likelihood of containing similar words. Consider the following: </p>
         <ul>
             <li><strong>Does this column contain descriptive text?</strong> If not, consider a different column.</li>
             <li><strong>Are you trying to detect synonymous words within this column? </strong> If not, consider a different column.</li>
@@ -41,9 +58,10 @@
             <select class="form-control" id="columnId" name="columnId" disabled>
             </select>
         </div>
-        <input type="submit" name="selftrained-setup" class="btn btn-success" value="Setup agent"></input>
+        <input type="submit" name="selftrained-setup" class="btn btn-success" data-toggle="modal"
+            data-target="#loadingValidationModal" value="Setup agent"></input>
 
-    <h1 class="my-3"><strong>OR</strong></h1>
+    <h2 class="my-3"><strong>OR</strong></h2>
         <div class="form-group">
             <label for="datasetSelect">Select a pretrained model</label>
             <select class="form-control" id="pretrainedSelect" name="pretrainedSet">
@@ -53,7 +71,8 @@
                 {% endfor %}
             </select>
         </div>
-        <input type="submit" name="pretrained-setup" class="btn btn-success" value="Use pretrained model"></input>
+        <input type="submit" name="pretrained-setup" class="btn btn-success" value="Use pretrained model"
+         data-toggle="modal" data-target="#loadingValidationModal"></input>
     </form>
 </div>
 {% endblock %}

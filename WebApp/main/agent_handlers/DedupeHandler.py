@@ -131,6 +131,17 @@ class DedupeHandler:
         data_csv = pd.read_csv(dataset.upload.path)
         agent_cols = AgentColumn.objects.filter(agent = agent)
 
+        column_names = []
+        # for dedupe, because columns are not form data but automatically infered from training,
+        # we need to manually check that all columns exist in the dataset
+        for col in agent_cols:
+            if col.name not in data_csv.columns:
+                messages.add_message(
+                    request, messages.ERROR, "The selected dataset does not contain column '" + col.name + "', which is required for this agent.")
+                return redirect('/analyze')
+            column_names.append(col.name)
+
+
         # make sure all columns are of type string
         mismatches = AgentUtility.dataset_all_columns_match(data_csv, 
                         list(map(lambda x: (x.name, np.object), agent_cols)))
@@ -144,7 +155,10 @@ class DedupeHandler:
             model = dedupe.StaticDedupe(f, num_cores=0)
             
             # cluster samples
-            clusters = model.partition(data)
+            try:
+                clusters = model.partition(data)
+            except dedupe.core.BlockingError:
+                clusters = []
 
             # column which assigns a label (cluster id) to each row
             cluster_label = [0] * data_csv.shape[0]
@@ -153,6 +167,9 @@ class DedupeHandler:
 
             # prepare columns for the dataset download as well as the web-app display
             clusters_full = []
+            # list of only those cluster ids that are indicative of a data smell
+            smell_clusters = []
+
             for i, (records, scores) in enumerate(clusters, start=1):
                 cluster = []
                 for j, record in enumerate(records):
@@ -175,13 +192,17 @@ class DedupeHandler:
                         continue
 
                     occurences = list(map(lambda x: variants.count(x), variants_set))
-
                     clusters_full.append(list(zip(variants, occurences)))
+                    smell_clusters.append(i)
 
-            # store labelled dataset in cache 
-            
+            # store labelled dataset in cache
             data_csv['cluster'] = cluster_label
             data_csv['probability'] = cluster_probability
+            # show only those cluster IDs that are indicative of a data smell
+            data_csv['cluster'] = data_csv['cluster'].map(lambda x: x if x in smell_clusters else None)
+            data_csv['probability'] = np.where(data_csv['cluster'].isnull(), None, data_csv['probability'])
+
             cache.set(request.user.username + "_dataset", data_csv)
 
-        return render(request, 'agents/validate_dedupe.html', {"username": request.user.username, "agent": agent, "dataset": dataset, "data": data, "clusters": clusters_full})
+        return render(request, 'agents/validate_dedupe.html', {"username": request.user.username, "agent": agent, "dataset": dataset, "data": data, "clusters": clusters_full,
+                                                                    "column_names": column_names})

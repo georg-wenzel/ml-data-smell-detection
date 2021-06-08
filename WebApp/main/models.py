@@ -84,3 +84,9 @@ class AgentColumn(models.Model):
     name = models.CharField(max_length=255)
     dtype = models.CharField(max_length=255)
     agent = models.ForeignKey(Agent, on_delete=models.CASCADE)
+
+class Smell(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    agent_type = models.ForeignKey(AgentType, on_delete=models.RESTRICT)
+    dataset_description = models.TextField()

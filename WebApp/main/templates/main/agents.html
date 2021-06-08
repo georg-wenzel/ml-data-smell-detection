@@ -1,7 +1,25 @@
 {% extends "main/baseloggedin.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Training Agent</h5>
+            </div>
+            <div class="modal-body">
+                Your agent is currently training. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your agent is still actively being
+                trained. <br />
+                <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <h3 class="mb-3">{{ username }}'s ML Agents</h3>
     <a href="/agents/add"><button class="btn btn-success"><span class="oi oi-plus mr-2"></span>Add new</button></a>
@@ -26,8 +44,13 @@
                 <td>{{agent.agent_type.name}}</td>
                 <td>{{agent.description}}</td>
                 <td>{{agent.status}}</td>
-                <td class="text-center"><a href="/agents/train/{{agent.id}}"><button class="btn btn-primary"><span
-                                class="oi oi-copywriting"></span></button></a></td>
+                {% if agent.external_set_key or agent.dataset %} <td class="text-center"><a
+                        href="/agents/train/{{agent.id}}"><button class="btn btn-primary" data-toggle="modal"
+                            data-target="#loadingValidationModal"><span class="oi oi-copywriting"></span></button></a>
+                </td>
+                {% else %} <td class="text-center"><a href="/agents/train/{{agent.id}}"><button
+                            class="btn btn-primary"><span class="oi oi-copywriting"></span></button></a></td>
+                {% endif %}
                 <td class="text-center"><a href="/agents/{{agent.id}}"><button class="btn btn-secondary"><span
                                 class="oi oi-pencil"></span></button></a></td>
                 <td class="text-center"><button class="btn btn-danger"
@@ -41,41 +64,41 @@
 </div>
 
 <!-- Delete agent modal -->
-<div class="modal fade" id="deleteAgentModal" tabindex="-1" role="dialog" aria-labelledby="deleteAgentModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="deleteAgentModalLabel">Delete agent</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-              </button>
-          </div>
-          <div class="modal-body">
-            You are about to delete the agent <strong><span id="deleteFileName">Agent Name</span></strong>. <br />
-            This action <strong> CANNOT BE UNDONE. </strong>
-            <form action="/agents/delete/" method="POST" class="form-group" id="deleteAgentForm">
-              {% csrf_token %}
-              {{ deleteForm }}
-          </form>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-danger" form="deleteAgentForm">Delete</button>
-          </div>
-      </div>
-  </div>
+<div class="modal fade" id="deleteAgentModal" tabindex="-1" role="dialog" aria-labelledby="deleteAgentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAgentModalLabel">Delete agent</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                You are about to delete the agent <strong><span id="deleteFileName">Agent Name</span></strong>. <br />
+                This action <strong> CANNOT BE UNDONE. </strong>
+                <form action="/agents/delete/" method="POST" class="form-group" id="deleteAgentForm">
+                    {% csrf_token %}
+                    {{ deleteForm }}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger" form="deleteAgentForm">Delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-deleteDatasetId = 0
+    deleteDatasetId = 0
 
-  function openDeleteAgent(id, name) 
-  {
-    $('#deleteFileName').text(name)
-    $('#id_id').val(id)
-    $('#deleteAgentModal').modal().show(true)
-  }
+    function openDeleteAgent(id, name) {
+        $('#deleteFileName').text(name)
+        $('#id_id').val(id)
+        $('#deleteAgentModal').modal().show(true)
+    }
 </script>
 {% endblock %}

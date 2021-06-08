@@ -1,2 +1,2 @@
-yyyy-MM-ddThh:mm:ss.sz
-yyyy-MM-dd hh:mm:ssz
+yyyy-MM-ddThh:mm:ssz
+yyyy-MM-dd hh:mm:ss.sz

@@ -2,4 +2,8 @@
 /db.sqlite3-journal
 */migrations
 __pycache__/
-/data/
+
+/data/datasets/*
+/data/models/*
+!/data/datasets/user_1
+!/data/models/user_1

@@ -141,21 +141,21 @@ class AnomalyHandler:
         preds = model.predict(enc_x)
         mse = np.mean(np.power(enc_x - preds, 2), axis=1)
         data['mse'] = mse
-        data['class'] = data['mse'] > threshold
+        data['is_outlier'] = data['mse'] > threshold
         data.sort_values('mse', ascending=True, inplace=True)
 
         cache.set(request.user.username + "_dataset", data)
 
         #separate into class 0 and class 1 data
-        class_0 = data[data['class'] == 0]
-        class_1 = data[data['class'] == 1]
+        class_0 = data[data['is_outlier'] == 0]
+        class_1 = data[data['is_outlier'] == 1]
 
         #extract tuples of sorted column and MSE for display
         class_0_values = list(zip(class_0[kwargs['column'].name], round(class_0.mse, 4)))
         class_1_values =  list(zip(class_1[kwargs['column'].name], round(class_1.mse, 4)))
         
         #extract true counts
-        counts = [class_0.shape[0], class_1.shape[0]]
+        counts = [class_0.shape[0], class_1.shape[0], class_0.shape[1]/(class_0.shape[0] + class_1.shape[0])]
 
         #extract avg. classwise MSE and MSE threshold
         mse_values = [round(np.mean(class_0['mse']),4), round(np.mean(class_1['mse']),4), round(threshold,4)]

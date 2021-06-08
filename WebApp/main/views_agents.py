@@ -53,6 +53,8 @@ def add_agent(request):
             agent.user = request.user
             agent.agent_type = atype
             agent = agent.save()
+    else:
+        messages.add_message(request, messages.ERROR, "An unknown error occured while creating this agent.")
 
     return redirect('/agents')
 

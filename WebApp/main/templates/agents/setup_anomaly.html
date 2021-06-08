@@ -3,16 +3,33 @@
 {% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Training Agent</h5>
+            </div>
+            <div class="modal-body">
+                Your agent is currently training. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your agent is still actively being
+                trained. <br />
+                    <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <img src="{% static 'main/tf_logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
     <h3 class="mb-3">Anomaly Detection Training (Agent: {{agent.name}})</h3>
-    <div class="alert alert-secondary" role="alert">
+    <div class="alert alert-info" role="alert">
         <h5>How to train</h5>
-        <p>TensorFlow is a library for training neural networks. The specific architecture in this WebApp is an autoencoder,
+        <p>TensorFlow is a library for training neural networks. The specific architecture in this agent type is an autoe-ncoder,
             which reduces the data to a low dimensional vector and then aims to reconstruct it. By training the encoder
             on one specific type of syntax, the network will remember to reconstruct the format well. When presented with a
             different format, the reconstruction error will typically be much higher. This allows for detection of 
-            format violations without ever specifically defining the format. Consider the following questions when choosing 
+            format violations without ever specifically defining the format. Consider the following when choosing 
             a target column:
         <ul>
             <li><strong>Does this column require a consistent syntax?</strong> If not, consider a different column.
@@ -47,7 +64,8 @@
             <select class="form-control" id="columnId" name="columnId" disabled>
             </select>
         </div>
-        <button type="submit" class="btn btn-success">Setup Agent</button>
+        <button type="submit" class="btn btn-success" data-toggle="modal"
+            data-target="#loadingValidationModal">Setup Agent</button>
     </form>
 </div>
 {% endblock %}

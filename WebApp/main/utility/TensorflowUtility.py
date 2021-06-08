@@ -62,7 +62,7 @@ def train_model(encoder, enc_x, enc_y, weights):
         optimizer=tf.keras.optimizers.Adam(learning_rate=0.005),
         metrics=['accuracy'])
 
-    #train the model with earlystopping when loss does not improve for 5 epochs
+    #train the model with earlystopping
     callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
     model.fit(enc_x, enc_y, epochs=100, batch_size=4, class_weight=weights, shuffle=True, callbacks=[callback])
 
@@ -82,7 +82,7 @@ def train_anomaly_model(enc_x, input_dim):
     model.compile(optimizer=tf.keras.optimizers.Adam(), loss='mse',  metrics=['acc'])
 
     #train the model with early stopping
-    callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)#train the model
+    callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
     model.fit(enc_x, enc_x, epochs=700, batch_size=4, callbacks=[callback])
 
     return model

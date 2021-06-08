@@ -52,7 +52,7 @@ def add_dataset(request):
         dataset.user = request.user
         #open csv file
         try:
-            csv = pandas.read_csv(dataset.upload)
+            csv = pandas.read_csv(dataset.upload, index_col=False)
             dataset.row_length = csv.shape[0]
             dataset.col_length = csv.shape[1]
             dataset.save()

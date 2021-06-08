@@ -3,27 +3,41 @@
 {% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Training Agent</h5>
+            </div>
+            <div class="modal-body">
+                Your agent is currently training. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your agent is still actively being
+                trained. <br />
+                    <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <img src="{% static 'main/tf_logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
     <h3 class="mb-3">LSTM Agent Training (Agent: {{agent.name}})</h3>
-    <div class="alert alert-secondary" role="alert">
+    <div class="alert alert-info" role="alert">
         <h5>How to train</h5>
-        <p>TensorFlow is a library for training neural networks. The specific architecture in this WebApp is an LSTM,
+        <p>TensorFlow is a library for training neural networks. The specific architecture in this agent type is an LSTM,
             built for classifying texts based on a character-level analysis. As such, this TensorFlow model should be
             trained on a column where text can be analyzed on a character-level, rather than a word level. Keep in mind
-            TensorFlow requires <strong>labelled data</strong> to learn. When choosing a column for TensorFlow
-            modelling, consider the following: </p>
+            TensorFlow requires <strong>labeled data</strong> to learn. Choose your columns as follows: </p>
         <ul>
-            <li><strong>Should this column contain a consistent syntax?</strong> If not, consider a different column.
-            </li>
-            <li><strong>Is the syntax of this column analyzable on a character level? </strong> If not,
-                consider a different column.</li>
+            <li>For the <strong>data</strong> column, choose a column to classify on a character level.
+            <li>For the <strong>label</strong> column, choose an integer column ranging from 0-n, classifying your training samples.
         </ul>
         </p>
         <p>
             Example fields that the LSTM may be appropriate for:
             <ul>
-                <li>Dates</li>
+                <li><strong>Dates</strong></li>
                 <li>Serial Codes</li>
                 <li>Phone Numbers</li>
             </ul>
@@ -52,7 +66,8 @@
             <select class="form-control" id="labelColumnId" name="labelColumnId" disabled>
             </select>
         </div>
-        <button type="submit" class="btn btn-success">Setup Agent</button>
+        <button type="submit" class="btn btn-success" data-toggle="modal"
+            data-target="#loadingValidationModal">Setup Agent</button>
     </form>
 </div>
 {% endblock %}

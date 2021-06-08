@@ -1,4 +1,7 @@
+{% load crispy_forms_tags %}
+
 <html lang="en">
+
 <head>
     <title>ML Data Smell Detection</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
@@ -43,6 +46,7 @@
             <strong class="mr-auto">
                 {% if message.tags == 'error' %} Error {% endif %}
                 {% if message.tags == 'success' %} Success {% endif %}
+                {% if message.tags == 'success' %} Success {% endif %}
             </strong>
             <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -72,6 +76,7 @@
                 <h4>The general workflow</h4>
             </div>
         </div>
+
         <div class="row mx-1 pt-3 mb-4 text-justify">
             <div class="col-lg-3 mb-4">
                 <div class="card shadow">
@@ -99,7 +104,8 @@
                         </div>
                         <div class="card-text">
                             <p>Use the <a href="/agents">ML Agents</a> page to define a ML agent. The page will give
-                                overviews about how the different agents learn and which data smells each type may be able to
+                                overviews about how the different agents learn and which data smells each type may be
+                                able to
                                 detect.</p>
                         </div>
                     </div>
@@ -130,15 +136,91 @@
                         </div>
                         <div class="card-text">
                             <p><a href="/analyze">Analyze</a> an uploaded dataset using a trained agent to check for
-                                signs of low quality data and extract detailed classification of samples based on previous training.</p>
+                                signs of low quality data and extract detailed classification of samples based on
+                                previous training.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div class="row bg-primary text-white mx-1 rounded align-items-center mb-4" style="height:50px;">
+            <div class="text-center w-100">
+                <h4>Pre-trained agents</h4>
+            </div>
+        </div>
+        <p>
+            This application ships with a variety of pre-trained agents demonstrating the its capabilities.
+            These agents are available to the root user and may be deleted at any time. Below is a quick description on
+            how to use each pre-trained agent.
+        </p>
+        <div class="row text-justify">
+            <div class="col-lg mb-3">
+                <h6>Spacing / Casing / Truncating Inconsistency Agent</h6>
+                Finds clusters of <strong>Names</strong> which are subject to spacing, casing or truncating
+                inconsistencies.
+                Requires a "Name" column in the dataset. Success may greatly vary depending on other noise in the
+                dataset
+                and structure of names due to the underlying methodology.
+            </div>
 
+            <div class="col-lg mb-3">
+                <h6>Synonym Detection Agent</h6>
+                Finds synonymous and other closely related words in any given textual column. An agent based on wikipedia
+                data and one based on twitter data is available, for different levels of language. For detection of more
+                dataset-specific synonyms, consider creating your own agent.
+            </div>
+        </div>
 
+        <div class="row mb-4 text-justify">
+            <div class="col-lg mb-3">
+                <h6>Date Smell Agent</h6>
+                Detects a variety of date smells. The format that can be provided is somewhat flexible, but should
+                follow
+                the general structure "<strong>[Date] [Time] [Timezone]</strong>" (no quotation marks), where [Timezone]
+                takes the form
+                "+xx:00" or
+                "-xx:00". The detection of smells on other formats is theoretically possible, but accuracy may decrease
+                greatly.
+            </div>
+
+            <div class="col-lg mb-3">
+                <h6>Date Inconsistency Agent</h6>
+                Detects deviation from the date format <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>.
+                Semantics of the date are not checked by this agent, only the format. The agent was trained on a large
+                number of dates using this format, but was never specifically given the format structure.
+            </div>
+        </div>
+
+        <div class="row bg-primary text-white mx-1 rounded align-items-center mb-4" style="height:50px;">
+            <div class="text-center w-100">
+                <h4>Agent Creation QuickStart</h4>
+            </div>
+        </div>
+        <p>
+            Want to create an agent for your Dataset specifically? <a href="datasets/">Upload your training dataset
+                first</a>, then come back here and select the corresponding data smell to quickly create an agent of the
+            corresponding type.
+        </p>
+        <select class="form-control" id="smellSelect" onchange="smellChanged()">
+            <option disabled selected>Select a Data Smell</option>
+            {% for smell in smells %}
+            <option value={{smell.id}}>{{smell.name}}</option>
+            {% endfor %}
+        </select>
+
+        <p class="mt-4 mb-3">
+            <strong>Recommended Agent</strong><br /><span id="smellAgent">None</span> <br /><br />
+            <strong>Description</strong><br /> <span id="smellDescription">None</span> <br /><br />
+            <strong>Dataset Tips</strong><br /> <span id="smellDataset">None</span> <br /><br />
+        </p>
+
+        <h5>Create this agent type now</h5>
+        <form method="POST" action="/agents/add">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success" id="btnSubmitAgent" disabled>Create Agent</button>
+        </form>
     </div>
     {% endblock %}
 </body>
@@ -152,7 +234,25 @@
     $('.toast').toast('show');
 </script>
 {% endif %}
+
 {% block scripts %}
+<script>
+    function smellChanged() {
+        value = $("#smellSelect").val()
+        $.ajax({
+            url: '/ajax/get_smell_data/' + value,
+            dataType: 'json',
+            success: function (data) 
+            {
+                $("#smellAgent").html(data.agent_type_name)
+                $("#smellDescription").html(data.description)
+                $("#smellDataset").html(data.dataset_description)
+                $("#id_agent_type").val(data.agent_type_id)
+                $("#btnSubmitAgent").prop("disabled", false)
+            }
+        });
+    }
+</script>
 {% endblock %}
 
 </html>

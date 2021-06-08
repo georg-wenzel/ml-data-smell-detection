@@ -72,8 +72,8 @@ output_folder = input("Path to output FOLDER: ")
 #holds all the training and validation formats
 dateformats = []
 timeformats = []
-dateformats_val = []
-timeformats_val = []
+dateformats_test = []
+timeformats_test = []
 
 # first, load all possible formats from the text files
 with open(formats_train) as f:
@@ -90,8 +90,8 @@ with open(formats_test) as f:
     # the end of dates and start of times is indicated by a newline
     for i, f in enumerate(formats):
         if not f:
-            dateformats_val = formats[:i]
-            timeformats_val = formats[i+1:]
+            dateformats_test = formats[:i]
+            timeformats_test = formats[i+1:]
             break
 
 # a helper method which simplifies applying the conditions in the above array
@@ -233,16 +233,16 @@ for a, dateformat in enumerate(dateformats):
         date_id = a * (len(timeformats)+1) + len(timeformats)
         labels_train += (create_correct_entries(dateformat, timeformat, date_id, datetime_id))
         labels_train += (create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incorrect_train_multiplier))
-        labels_test += (create_correct_entries(dateformat, timeformat, date_id, datetime_id))
-        labels_test += (create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incorrect_test_multiplier))
-
-# for the validation set, iterate over the validation formats instead
-for a, dateformat in enumerate(dateformats_val):
-    for b, timeformat in enumerate(timeformats_val):
-        datetime_id = a * (len(timeformats_val)+1) + b
-        date_id = a * (len(timeformats_val)+1) + len(timeformats_val)
         labels_validate += (create_correct_entries(dateformat, timeformat, date_id, datetime_id))
         labels_validate += (create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incorrect_test_multiplier))
+
+# for the test set, iterate over the test formats instead
+for a, dateformat in enumerate(dateformats_test):
+    for b, timeformat in enumerate(timeformats_test):
+        datetime_id = a * (len(timeformats_test)+1) + b
+        date_id = a * (len(timeformats_test)+1) + len(timeformats_test)
+        labels_test += (create_correct_entries(dateformat, timeformat, date_id, datetime_id))
+        labels_test += (create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incorrect_test_multiplier))
 
 df=pandas.DataFrame(labels_train, columns=['Date', 'true_label', 'Format'])
 df.to_csv(os.path.join(output_folder, "train.csv"), index=False)

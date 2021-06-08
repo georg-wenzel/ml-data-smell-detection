@@ -173,10 +173,27 @@ class LSTMHandler:
             else:
                 examples.append(classes[i])
 
-        # store dataset in cache
         data['label'] = csv_labels
         data['probability'] = csv_probability
+
+        # Static dictionary of smell names which relate to the classes of the pretrained LSTM agent
+        class_labels = range(0,8)
+        if "useBaseLabels" in request.POST:
+            label_dict = {
+                0: "No Data Smell",
+                1: "Date as String Smell",
+                2: "DateTime as String Smell",
+                3: "Date as DateTime Smell",
+                4: "Shorthand Date",
+                5: "Shorthand DateTime",
+                6: "Shorthand Time",
+                7: "Missing Timezone"
+            }
+            data['label'] = data['label'].map(label_dict)
+            class_labels = map(label_dict.get, class_labels)
+
+        # store dataset in cache
         cache.set(request.user.username + "_dataset", data)
 
         return render(request, 'agents/validate_tensorflow.html', {"username": request.user.username, "agent": agent, "dataset": dataset, 
-                        "class_data": list(zip(ratio, examples, total_samples))})
+                        "class_data": list(zip(ratio, examples, total_samples, class_labels))})

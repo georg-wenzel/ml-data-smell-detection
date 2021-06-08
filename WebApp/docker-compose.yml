@@ -1,0 +1,22 @@
+version: "3.9"
+   
+services:
+    memcached:
+        image: memcached
+        ports:
+        - "11211:11211"
+        environment:
+        - m=10
+        expose:
+        - "11211"
+    web:
+        build: .
+        command: python manage.py runserver 0.0.0.0:8000 --settings=thesis.settings_docker
+        volumes:
+        - .:/webapp
+        ports:
+        - "8000:8000"
+        depends_on:
+        - memcached
+        links:
+        - memcached

@@ -2,18 +2,22 @@
 
 {% block content %}
 <div class="container pt-5">
-    <h3>TensorFlow Results: {{agent.name}} on {{dataset.name}}</h3>
+    <h3>LSTM Detection Results</h3>
+    <p><strong>Agent</strong>: {{agent.name}} <br />
+    <strong>Dataset</strong>: {{dataset.name}}</p>
     <a href="/download"><button class="btn btn-success"><span class="oi oi-data-transfer-download"></span> Download
             Results</button></a>
 
     <h5 class="mt-3">LSTM Classification</h5>
     <p class="text-justify">Shown below is the class distribution of your data as well as examples for each class.
-        Because the meaning of each class can be freely chosen by the user, this application does not make assumptions
-        about your class labeling. Instead, if the class distribution does not match up your expectations, please
+        By default, the classes are labeled by the corresponding data smells according to the research paper.
+        This can be disabled on the analyze page. If the class distribution does not match up your expectations, please
         download the corresponding dataset to further inspect the classification.</p>
 
+    <hr />
+
     {% for class in class_data %}
-    <h6 class="mb-0"> Class ID {{forloop.counter0}} </h6>
+    <h6 class="mb-0"> Class {{class.3}} </h6>
     <div>
         <p>
             This class contains <strong>{{class.2}}</strong> total samples, or <strong>{{class.0}}%</strong> of the

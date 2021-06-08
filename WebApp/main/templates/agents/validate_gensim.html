@@ -2,7 +2,9 @@
 
 {% block content %}
 <div class="container pt-5">
-    <h3>Gensim Results: {{agent.name}} on {{dataset.name}}</h3>
+    <h3>Synonym Detection Results</h3>
+    <p><strong>Agent</strong>: {{agent.name}} <br />
+    <strong>Dataset</strong>: {{dataset.name}}</p>
     <a href="/download"><button class="btn btn-success"><span class="oi oi-data-transfer-download"></span> Download
             Results</button></a>
 
@@ -21,12 +23,14 @@
 
     <form method="POST" action="/analyze/duplicates">
         {% csrf_token %}
-        <div class="form-group" style="overflow-y: auto; height: 40em;">
+        <div class="card mb-3">
+        <div class="form-group mb-0" style="overflow-y: auto; height: 30em;">
             <input hidden name="dataset" value={{dataset.id}} />
             <input hidden name="column" value={{column.id}} />
             {% for pair in pairs %}
             <input type="checkbox" name={{pair.3}}> {{pair.0}} - {{pair.1}} (rcs_10: {{pair.2}})<br />
             {% endfor %}
+        </div>
         </div>
         <button type="submit" class="btn btn-success">Find duplicates in dataset</button>
     </form>

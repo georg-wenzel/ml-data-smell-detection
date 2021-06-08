@@ -3,26 +3,43 @@
 {% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Training Agent</h5>
+            </div>
+            <div class="modal-body">
+                Your agent is currently training. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your agent is still actively being
+                trained. <br />
+                <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <img src="{% static 'main/dedupeio-logo.png' %}" width="300" alt="Dedupe.io Logo" class="mb-3">
     <h3 class="mb-3">Dedupe Agent Training (Agent: {{agent.name}})</h3>
-    <div class="alert alert-secondary" role="alert">
+    <div class="alert alert-info" role="alert">
         <h5>How to train</h5>
         <p>Dedupe is a deduplication library using fuzzy string matching with rules learned from active user input. </p>
-        <p>When selecting which columns to train on, ask yourself the following questions:
-        <ul>
-            <li><strong>Can this column contain duplicate entries?</strong> If not, consider omitting it.</li>
-            <li><strong>Does this field contain textual data or numeric data that represents an abstract concept? (e.g.
-                    zip codes)</strong> If not, consider omitting it.</li>
-        </ul>
+        <p>Dedupe may be trained on multiple columns. When selecting which columns to train on, ask yourself the
+            following questions:
+            <ul>
+                <li><strong>Can this column help detect duplicate entries?</strong> If not, consider omitting it.</li>
+                <li><strong>Are the values of this column related to the data smell you want to detect?</strong> If not, consider omitting it.</li>
+            </ul>
         </p>
         <p>
             Example fields that Dedupe may be appropriate for:
-        <ul>
-            <li>Names</li>
-            <li>Addresses</li>
-            <li>Concise Descriptions</li>
-        </ul>
+            <ul>
+                <li>Names</li>
+                <li>Addresses</li>
+                <li>Concise Descriptions</li>
+            </ul>
         </p>
     </div>
 
@@ -43,7 +60,8 @@
                 Select a dataset first.
             </div>
         </div>
-        <button type="submit" class="btn btn-success">Setup Agent</button>
+        <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#loadingValidationModal">Setup
+            Agent</button>
     </form>
 </div>
 {% endblock %}
@@ -61,7 +79,9 @@
                 container = $("#columnList")
                 container.empty()
                 data.columns.forEach(element => {
-                    container.append('<input type="checkbox" class="form-check-input" name="check' + counter + '" value="' + element.id + '"/>' + element.name + ' (' + element.dtype + ')<br />')
+                    container.append('<input type="checkbox" class="form-check-input" name="check' +
+                        counter + '" value="' + element.id + '"/>' + element.name + ' (' +
+                        element.dtype + ')<br />')
                     counter++
                 })
             }

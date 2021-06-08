@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from main.models import Dataset, Agent, Column
+from main.models import Dataset, Agent, Column, Smell
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.cache import cache
 from main.utility.DatabaseUtility import safe_get
@@ -49,6 +49,19 @@ def get_agent_type(request, id):
         return HttpResponseBadRequest(StringUtility.ERR_UNAUTHORIZED.format("Agent"))
 
     res = {'type': agent.agent_type.id}
+    return JsonResponse(res)
+
+# view which returns data as json for a given smell ID
+# id is the id of the smell to get the data of
+@csrf_exempt
+def get_smell_data(request, id):
+
+    smell = safe_get(Smell, id=id)
+    if not smell:
+        return HttpResponseBadRequest(StringUtility.ERR_INVALID_KEY.format("Smell"))
+
+    res = {'name': smell.name, 'description': smell.description, 'agent_type_id': smell.agent_type.id, 
+            'agent_type_name': smell.agent_type.name, 'dataset_description': smell.dataset_description}
     return JsonResponse(res)
 
 # view which returns the id and name of all gensim agents the user has access to, that do not have the id given in the request

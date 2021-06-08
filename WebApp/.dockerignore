@@ -1,0 +1,5 @@
+venv
+.scannerwork
+.vscode
+__pycache__
+.gitignore

@@ -1,6 +1,24 @@
 {% extends "main/baseloggedin.html" %}
+{% load static %}
 
 {% block content %}
+<div class="modal hide" id="loadingValidationModal" tabindex="-1" role="dialog" aria-labelledby="loadingValidationModal"
+    data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingValidationModalTitle">Validating Data</h5>
+            </div>
+            <div class="modal-body">
+                Your dataset is currently being validated. <strong>Please be patient!</strong> This process may take a
+                while. As long as the application does not produce an error, your dataset is still actively being
+                processed. <br />
+                <img src="{% static 'main/loading.gif' %}" class="mx-auto d-block" alt="Loading...">
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container pt-5">
     <h3>Data Validation</h3>
     <p>Perform data validation on datasets using trained agents. Depending on the type of agent used, your output may
@@ -72,7 +90,16 @@
             </select>
         </div>
 
-        <button class="btn btn-success mt-4" type="submit">Validate Dataset</button>
+        <div id="baseLabels" class="mb-4" hidden>
+            <h6>Use predefined labels</h6>
+            If this option is enabled, classes will be displayed by the smell they represent in the pre-trained agent
+            rather than simply class IDs. This can be helpful when using the pre-trained agents, but if you are training
+            your own LSTM agents with different class representations, the labels will not correspond. <br />
+            <input type="checkbox" id="useBaseLabels" name="useBaseLabels" value="" checked> Use predefined labels
+        </div>
+
+        <button class="btn btn-success mt-4" type="submit" data-toggle="modal"
+            data-target="#loadingValidationModal">Validate Dataset</button>
     </form>
 </div>
 {% endblock %}
@@ -100,37 +127,40 @@
     function agentChanged() {
         value = $("#selectAgent").val()
         $.ajax({
-                url: '/ajax/get_agent_type/' + value,
-                dataType: 'json',
-                success: function (data) {
-                    //hide "select an agent"
-                    $('#defaultSelectAgent').hide()
+            url: '/ajax/get_agent_type/' + value,
+            dataType: 'json',
+            success: function (data) {
+                //hide "select an agent"
+                $('#defaultSelectAgent').hide()
 
-                    //gensim => show rcs options
-                    $('#rcsInput').attr('hidden', data.type != 2);
+                //gensim => show rcs options
+                $('#rcsInput').attr('hidden', data.type != 2);
 
-                    //gensim & tf => show column selection
-                    $('#colSelect').attr('hidden', data.type == 1);
+                //gensim & tf => show column selection
+                $('#colSelect').attr('hidden', data.type == 1);
 
-                    if (data.type == 2) {
-                        //make a second ajax call to get other gensim agents which can be used as secondary agents
-                        $.ajax({
-                                url: '/ajax/get_other_gensim_agents/' + value,
-                                dataType: 'json',
-                                success: function (data) {
-                                    select = $("#rcsSecondaryAgent")
-                                    options =
-                                        "<option value=\"-1\" selected>Do not use a secondary agent</option>"
-                                    data.agents.forEach(element => {
-                                        options += '<option value="' + element.id + '">' +
-                                            element.name + '</option>'
-                                    })
-                                    select.html(options)
-                                }
+                //lstm => show base label option
+                $('#baseLabels').attr('hidden', data.type != 3);
+
+                if (data.type == 2) {
+                    //make a second ajax call to get other gensim agents which can be used as secondary agents
+                    $.ajax({
+                        url: '/ajax/get_other_gensim_agents/' + value,
+                        dataType: 'json',
+                        success: function (data) {
+                            select = $("#rcsSecondaryAgent")
+                            options =
+                                "<option value=\"-1\" selected>Do not use a secondary agent</option>"
+                            data.agents.forEach(element => {
+                                options += '<option value="' + element.id + '">' +
+                                    element.name + '</option>'
                             })
+                            select.html(options)
                         }
-                    }
-                });
-        }
+                    })
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

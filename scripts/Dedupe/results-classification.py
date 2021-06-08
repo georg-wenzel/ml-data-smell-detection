@@ -33,7 +33,7 @@ for i in cluster_ids:
     #get the cluster ID dedupe has assigned to the non-smelly value
     dedupe_cluster = data[(data['true_label'] == i) & (data[smell_col_name].isnull())].iloc[0]['cluster']
     #replace the dedupe cluster ID with the negation of the real cluster ID
-    data['cluster'].replace({dedupe_cluster: -i}, inplace=True)
+    if not np.isnan(dedupe_cluster): data['cluster'].replace({dedupe_cluster: -i}, inplace=True)
 # at this point, every dedupe cluster is mapped to its corresponding base-entry cluster ID (*-1)
 
 #dictionary which holds the amount of smells we detected properly and improperly detected for each smell

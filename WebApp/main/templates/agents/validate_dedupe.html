@@ -2,15 +2,25 @@
 
 {% block content %}
 <div class="container pt-5">
-    <h3>Dedupe Results: {{agent.name}} on {{dataset.name}}</h3>
+    <h3>Inconsistency Detection Results</h3>
+    <p><strong>Agent</strong>: {{agent.name}} <br />
+        <strong>Dataset</strong>: {{dataset.name}}</p>
     <a href="/download"><button class="btn btn-success"><span class="oi oi-data-transfer-download"></span> Download
             Results</button></a>
     <h5 class="mt-3">Duplicate Clusters ({{clusters|length}} found)</h5>
     <p class="text-justify">Each cluster shown contains more than 1 entry. This means Dedupe assumes the corresponding
         entries are duplicates of one another. Note that only entries with more than one spelling variant are shown
-        here. This is because direct duplicate entries of one another do not constitute a data smell. However, you can
+        here. This is because direct duplicate entries of one another do not constitute a data smell. You can
         analyze the full cluster distribution by downloading the dataset above, which will label your input dataset with
-        a cluster ID and a probability score.</p>
+        a cluster ID and a probability score for all assumed data smell related duplicate entries.</p>
+
+    {% if clusters|length == 0 %}
+    <div class="alert alert-warning">
+        Dedupe did not find any clusters consisting of multiple variants of the same string. Your dataset may be free of
+        the smell you are trying to detect, or your agent may not be trained sufficiently.
+    </div>
+    {% endif %}
+
     <div id="accordion">
         {% for cluster in clusters %}
         <div class="card mb-2">
@@ -23,12 +33,26 @@
                 </h5>
             </div>
             <div id="collapse{{forloop.counter}}" class="collapse show" data-parent="#accordion">
-                <div class="card-body">
-                    {% for variant,occurences in cluster %}
-                    <strong>{{variant}}</strong> - {{occurences}} occurrence(s). 
-                    <hr />
-                    {% endfor %}
-                </div>
+                <table class="table table-striped" style="table-layout:fixed;">
+                    <thead>
+                        <tr>
+                            <th scope="col">Occurrences</th>
+                            {% for col in column_names %}
+                            <th scope="col">{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for variant,occurences in cluster %}
+                        <tr>
+                            <td>{{occurences}}</td>
+                            {% for col in variant %}
+                            <td>"{{col}}"</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
         {% endfor %}

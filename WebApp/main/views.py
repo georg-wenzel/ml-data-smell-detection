@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from main.utility.DjangoUtility import dict_contains_all
-from .models import Agent, Dataset, Column
+from .models import Agent, Dataset, Column, Smell
 from main.utility.DatabaseUtility import safe_get
 from main.utility import GensimUtility
 from main.utility.AgentUtility import agent_handlers
 from django.core.cache import cache
+from main.forms import AddAgentForm
 import pandas as pd
 from django.utils.html import escape
 
@@ -15,7 +16,9 @@ from django.utils.html import escape
 #render base logged in page if logged in, otherwise redirect to user login
 def home(request):
     if request.user.is_authenticated:
-        return render(request, 'main/baseloggedin.html', {"username": request.user.username})
+        smells = Smell.objects.all
+        form = AddAgentForm()
+        return render(request, 'main/baseloggedin.html', {"username": request.user.username, "smells": smells, "form": form})
     else:
         return redirect('/user/login')
 
@@ -145,7 +148,8 @@ def duplicates(request):
     #iterate over all word pairs and append occurences as well as ratio to each word pair, build new dataset
     for i in occurences:
         rows.append([occurences[i]["word1"], occurences[i]["word2"], occurences[i]["rcs"], len(occurences[i]["word1_occurences"]), 
-                        len(occurences[i]["word2_occurences"]), round(len(occurences[i]["word1_occurences"])/len(occurences[i]["word2_occurences"]), 4)])
+                        len(occurences[i]["word2_occurences"]), 
+                        round(len(occurences[i]["word1_occurences"])/len(occurences[i]["word2_occurences"]), 4) if len(occurences[i]["word2_occurences"]) > 0 else None])
 
 
     #store new dataset in cache
