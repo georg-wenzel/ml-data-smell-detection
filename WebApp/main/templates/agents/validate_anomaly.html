@@ -18,7 +18,7 @@
 
         The threshold MSE required for a sample to be classified as an outlier is <strong>{{mse.2}}</strong>.
 
-        {% if counts.2 < 0.02 %}
+        {% if counts.2 < 0.02 and counts.2 > 0 %}
         <div class="alert alert-warning mt-2">
             <strong>Warning</strong><br />
             Less than 2% of data points were found to be anomalies. The threshold is set such that a small number (~1%)
@@ -32,6 +32,7 @@
     <div class="alert alert-success">
         <h6>Classified as inliers ({{counts.0}} entries)</h6>
         Overall, <strong>{{counts.0}}</strong> entries have been classified as inliers. <br />
+        {% if counts.0 > 0 %}
         The average mean squared error in this class is <strong>{{mse.0}}</strong>.
 
         <p>Head of inliers (lowest MSE):</p>
@@ -40,11 +41,13 @@
             <li>{{entry.0}} (MSE {{entry.1}})</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </div>
 
     <div class="alert alert-danger">
         <h6>Classified as outliers ({{counts.1}} entries)</h6>
         Overall, <strong>{{counts.1}}</strong> entries have been classified as outliers. <br />
+        {% if counts.1 > 0 %}
         The average mean squared error in this class is <strong>{{mse.1}}</strong>.
 
         <p>Tail of outliers (highest MSE):</p>
@@ -53,6 +56,7 @@
             <li>{{entry.0}} (MSE {{entry.1}})</li>
             {% endfor %}
         </ul>
+        {% endif %}
     </div>
 
 </div>

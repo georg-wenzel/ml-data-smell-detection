@@ -31,9 +31,9 @@ The account login data for the root user, containing sample datasets and agents,
 username: root
 password: root
 ```
+Keep in mind that while these agents model the agents evaluated in the thesis itself, they are not the same agents, and as such may perform slightly better or worse. For example, the LSTM agent within this implementation seems to be able to better classify dates with spelled out months than the agent evaluated within the thesis. However, agents performing slightly worse in some regards is also a possibility.  
 
 This implementation is meant to be used on a private network. If you wish to make this application publically available, consider following the Django deployment checklist (https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/) to avoid any security complications.
-
 # ML Data Smell Analysis
 
 ## Folder Structure<a name="folders"></a>

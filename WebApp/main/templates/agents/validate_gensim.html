@@ -9,6 +9,13 @@
             Results</button></a>
 
     <h5 class="mt-3">Similar pairs ({{pairs|length}} found)</h5>
+    {% if pairs|length == 0 %}
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> <br />
+        No pairs of high similarity were found. This could be caused by very distinct texts, a high cosine similarity
+        threshold, or a small sample size.
+    </div>
+    {% else %}
     <p class="text-justify">The following pairs of words were detected to be of similar semantics. You may download the
         full list of detected words using the download button, or manually select only synonymous pairs first. Clicking
         the button below will then further evaluate your selected pairs.</p>
@@ -34,5 +41,6 @@
         </div>
         <button type="submit" class="btn btn-success">Find duplicates in dataset</button>
     </form>
+    {% endif %}
 </div>
 {% endblock %}

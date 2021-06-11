@@ -155,7 +155,7 @@ class AnomalyHandler:
         class_1_values =  list(zip(class_1[kwargs['column'].name], round(class_1.mse, 4)))
         
         #extract true counts
-        counts = [class_0.shape[0], class_1.shape[0], class_0.shape[1]/(class_0.shape[0] + class_1.shape[0])]
+        counts = [class_0.shape[0], class_1.shape[0], class_1.shape[0]/(class_0.shape[0] + class_1.shape[0])]
 
         #extract avg. classwise MSE and MSE threshold
         mse_values = [round(np.mean(class_0['mse']),4), round(np.mean(class_1['mse']),4), round(threshold,4)]
