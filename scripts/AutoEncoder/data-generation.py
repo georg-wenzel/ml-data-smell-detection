@@ -99,7 +99,7 @@ def create_correct_entries(dateformat, label=-1):
             datestring = datestring.replace("s", str(ms).zfill(4))
             # S is replaced with AM or PM if the hour is < 13, otherwise it is omitted since AM or PM does not make sense
             datestring = datestring.replace(
-                "S", random.choice(valid['S']) if h < 13 else "")
+                "S", random.choice(valid['S']) if (h < 13 and h > 0) else "")
             # z is replaced with (+/-)xx:00 where xx is between 0 and 12
             datestring = datestring.replace(
                 "z", (("+" + str(z).zfill(2)) if z >= 0 else str(z).zfill(3)) + ":00")
