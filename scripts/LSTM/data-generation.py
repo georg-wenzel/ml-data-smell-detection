@@ -145,9 +145,9 @@ def create_correct_entries(dateformat, timeformat, date_id, datetime_id):
             datestring = datestring.replace("mm", str(m).zfill(2))
             datestring = datestring.replace("ss", str(s).zfill(2))
             datestring = datestring.replace("s", str(ms).zfill(4))
-            # S is replaced with AM or PM if the hour is < 13, otherwise it is omitted since AM or PM does not make sense
+            # S is replaced with AM or PM if the hour is > 0 and < 13, otherwise it is omitted since AM or PM does not make sense
             datestring = datestring.replace(
-                "S", random.choice(valid['S']) if h < 13 else "")
+                "S", random.choice(valid['S']) if (h < 13 and h > 0) else "")
             # z is replaced with (+/-)xx:00 where xx is between 0 and 12
             datestring = datestring.replace(
                 "z", (("+" + str(z).zfill(2)) if z >= 0 else str(z).zfill(3)) + ":00")
@@ -184,15 +184,15 @@ def create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incor
             monthdays = (1, valid['d'][1][M-1])
             d = random.randint(monthdays[0], monthdays[1])
             if key != "DATEASDATETIME":
-                # make sure the hour is < 13 if the smell is SHORTHANDTIME
-                h = random.randint(valid['h'][0], 12) if key == "SHORTHANDTIME" else random.randint(
+                # make sure the hour is between 1 and 12 if the smell is SHORTHANDTIME
+                h = random.randint(1, 12) if key == "SHORTHANDTIME" else random.randint(
                     valid['h'][0], valid['h'][1])
                 m = random.randint(valid['m'][0], valid['m'][1])
                 s = random.randint(valid['s'][0], valid['s'][1])
                 ms = random.randint(valid['ms'][0], valid['ms'][1])
                 z = random.randint(valid['z'][0], valid['z'][1])
             else:
-                h = 0
+                h = random.choice([0,12])
                 m = 0
                 s = 0
                 ms = 0
@@ -205,9 +205,13 @@ def create_incorrect_entries(dateformat, timeformat, date_id, datetime_id, incor
             datestring = datestring.replace("mm", str(m).zfill(2))
             datestring = datestring.replace("ss", str(s).zfill(2))
             datestring = datestring.replace("s", str(ms).zfill(4))
-            # S is replaced with AM or PM if the hour is < 13 and smell is not "SHORTHANDTIME", otherwise it is omitted
-            datestring = datestring.replace(
-                "S", random.choice(valid['S']) if h < 13 and key != "SHORTHANDTIME" else "")
+            # S is replaced with AM or PM, unless the smell dictates otherwise
+            if key == "SHORTHANDTIME":
+                datestring = datestring.replace("S", "")
+            elif key == "DATEASDATETIME":
+                datestring = datestring.replace("S", "AM" if h == 12 else "")
+            else:
+                datestring = datestring.replace("S", random.choice(valid['S']) if (h < 13 and h > 0) else "")
             # z is replaced with (+/-)xx:00 where xx is between 0 and 12
             tz_string = (("+" + str(z).zfill(2)) if z >= 0 else str(z).zfill(3)) + ":00"
             datestring=datestring.replace("z",  tz_string if key != "MISSINGTIMEZONE" else "")
